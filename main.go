@@ -91,6 +91,13 @@ type SchemeSymbol struct {
 func (s SchemeSymbol) GetType() string       { return "Symbol" }
 func (s SchemeSymbol) GetValue() interface{} { return s.Value }
 
+type SchemeList struct {
+	Value []SchemeInterface
+}
+
+func (s SchemeList) GetType() string       { return "List" }
+func (s SchemeList) GetValue() interface{} { return s.Value }
+
 type SchemeInterface interface {
 	GetType() string
 	GetValue() interface{} // This is for debugging purposes
