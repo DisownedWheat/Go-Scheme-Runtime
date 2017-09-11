@@ -74,6 +74,8 @@ func (s SchemeNumber) GetValue() interface{} { return s.Value }
 
 type SchemeFunc struct {
 	Value func(e *Env, args []SchemeInterface) SchemeInterface
+	Args  []SchemeInterface
+	Name  string
 	Env   *Env
 }
 
@@ -100,11 +102,19 @@ func MakeRootEnv() *Env {
 	var root Env
 	root.Init(nil)
 
-	root.Variables["def"] = SchemeFunc{
+	root.Variables["define"] = SchemeFunc{
 		Value: func(e *Env, args []SchemeInterface) SchemeInterface {
-			name := args[0].(SchemeSymbol)
-			value := args[1].(SchemeInterface)
-			e.Variables[name.Value] = value
+			var name string
+			var value SchemeInterface
+			switch v := args[0].(type) {
+			case SchemeFunc:
+				name = v.Name
+				value = v
+			case SchemeSymbol:
+				name = v.Value
+				value = args[1]
+			}
+			e.Variables[name] = value
 			return value
 		},
 	}
