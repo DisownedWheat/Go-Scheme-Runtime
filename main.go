@@ -1,5 +1,7 @@
 package RT
 
+import "fmt"
+
 type Env struct {
 	Variables map[string]SchemeInterface
 	Functions map[string]SchemeFunc
@@ -153,15 +155,23 @@ func MakeRootEnv() *Env {
 			for _, arg := range args {
 				switch v := arg.(type) {
 				case SchemeNumber:
-					print(v.Value, "")
+					print(v.Value, " ")
+					break
 				case SchemeString:
-					print(v.Value, "")
+					print(v.Value, " ")
+					break
 				case SchemeFunc:
-					print("Function", "")
+					print("Function", " ")
+					break
+				case SchemeSymbol:
+					val := Get(e, e, v.Value)
+					Call(e, e, "print", []SchemeInterface{val})
+					break
 				default:
 					print(v.GetValue(), " ")
 				}
 			}
+			fmt.Print("\n")
 			return SchemeNumber{Value: 0}
 		},
 	}
