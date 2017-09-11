@@ -80,6 +80,13 @@ type SchemeNumber struct {
 func (s SchemeNumber) GetType() string       { return "Number" }
 func (s SchemeNumber) GetValue() interface{} { return s.Value }
 
+type SchemeBool struct {
+	Value bool
+}
+
+func (s SchemeBool) GetType() string       { return "Bool" }
+func (s SchemeBool) GetValue() interface{} { return s.Value }
+
 type SchemeFunc struct {
 	Value func(e *Env, args []SchemeInterface) SchemeInterface
 	Args  []SchemeInterface
@@ -173,12 +180,33 @@ func MakeRootEnv() *Env {
 					val := Get(e, e, v.Value)
 					Call(e, e, "print", []SchemeInterface{val})
 					break
+				case SchemeBool:
+					print(v.Value, " ")
+					break
 				default:
 					print(v.GetValue(), " ")
 				}
 			}
 			fmt.Print("\n")
 			return SchemeNumber{Value: 0}
+		},
+	}
+
+	root.Variables["="] = SchemeFunc{
+		Value: func(e *Env, args []SchemeInterface) SchemeInterface {
+			returnVal := true
+			var prev SchemeInterface
+			for i, arg := range args {
+				if i == 0 {
+					prev = arg
+					continue
+				}
+				if arg.GetValue() != prev.GetValue() {
+					returnVal = false
+					break
+				}
+			}
+			return SchemeBool{Value: returnVal}
 		},
 	}
 
