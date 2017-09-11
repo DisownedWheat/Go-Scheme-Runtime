@@ -23,41 +23,47 @@ func (e *Env) GetType() string {
 
 func Call(e *Env, originalEnv *Env, funcName string, args []SchemeInterface) SchemeInterface {
 	funcError := "NO FUNCTION BY The Name " + funcName
-	if i, ok := e.Variables[funcName]; ok {
-
-		f, ok := i.(SchemeFunc)
-		if !ok {
-			if e.Parent == nil {
-				panic("This is not a function")
+	current := e
+	for {
+		if i, ok := current.Variables[funcName]; ok {
+			f, ok := i.(SchemeFunc)
+			if !ok {
+				if e.Parent == nil {
+					panic("This is not a function")
+				}
+				current = e.Parent
+				continue
 			}
-			return Call(e.Parent, originalEnv, funcName, args)
+			return f.Value(originalEnv, args)
 		}
-		return f.Value(originalEnv, args)
-	}
 
-	if e.Parent == nil {
-		panic(funcError)
+		if e.Parent == nil {
+			panic(funcError)
+		}
+		current = e.Parent
 	}
-	return Call(e.Parent, originalEnv, funcName, args)
 }
 
 func Get(e *Env, originalEnv *Env, varName string) SchemeInterface {
 	varError := "Undefined variable: " + varName
-	if i, ok := e.Variables[varName]; ok {
-		v, ok := i.(SchemeInterface)
-		if !ok {
-			if e.Parent == nil {
-				panic(varError)
+	current := e
+	for {
+		if i, ok := current.Variables[varName]; ok {
+			v, ok := i.(SchemeInterface)
+			if !ok {
+				if e.Parent == nil {
+					panic(varError)
+				}
+				current = e.Parent
 			}
-			return Get(e.Parent, e, varName)
+			return v
 		}
-		return v
-	}
 
-	if e.Parent == nil {
-		panic(varError)
+		if e.Parent == nil {
+			panic(varError)
+		}
+		current = e.Parent
 	}
-	return Get(e.Parent, e, varName)
 }
 
 type SchemeString struct {
